@@ -98,6 +98,7 @@ log.workspace = true
 markdown.workspace = true
 markdown_preview.workspace = true
 menu.workspace = true
+pdf_preview.workspace = true
 migrator.workspace = true
 miniprofiler_ui.workspace = true
 mimalloc = { version = "0.1", optional = true }
