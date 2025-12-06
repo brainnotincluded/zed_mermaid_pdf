@@ -11,6 +11,9 @@ use gpui::{
     Modifiers, ParentElement, Render, Resource, SharedString, Styled, StyledText, TextStyle,
     WeakEntity, Window, div, img, rems,
 };
+use flate2::{write::ZlibEncoder, Compression};
+use std::io::Write;
+use base64::{Engine as _, engine::general_purpose::URL_SAFE};
 use settings::Settings;
 use std::{
     ops::{Mul, Range},
@@ -607,6 +610,12 @@ fn render_markdown_code_block(
     parsed: &ParsedMarkdownCodeBlock,
     cx: &mut RenderContext,
 ) -> AnyElement {
+    if let Some(language) = &parsed.language {
+        if language.eq_ignore_ascii_case("mermaid") {
+             return render_mermaid_diagram(&parsed.contents, cx);
+        }
+    }
+
     let body = if let Some(highlights) = parsed.highlights.as_ref() {
         StyledText::new(parsed.contents.clone()).with_default_highlights(
             &cx.buffer_text_style,
@@ -645,6 +654,24 @@ fn render_markdown_code_block(
                 .right_1()
                 .top_1()
                 .child(copy_block_button),
+        )
+        .into_any()
+}
+
+fn render_mermaid_diagram(content: &SharedString, _cx: &mut RenderContext) -> AnyElement {
+    let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
+    encoder.write_all(content.as_bytes()).ok();
+    let compressed = encoder.finish().unwrap_or_default();
+    let encoded = URL_SAFE.encode(&compressed);
+    
+    let url = format!("https://kroki.io/mermaid/svg/{}", encoded);
+    
+    div()
+        .p_3()
+        .child(
+            img(ImageSource::Uri(url.into()))
+            .max_w_full()
+            // .w_full() // Allow it to be smaller if natural size is small
         )
         .into_any()
 }
