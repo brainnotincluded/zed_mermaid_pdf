@@ -669,7 +669,7 @@ fn render_mermaid_diagram(content: &SharedString, _cx: &mut RenderContext) -> An
     div()
         .p_3()
         .child(
-            img(url.into())
+            img(url)
             .max_w_full()
             // .w_full() // Allow it to be smaller if natural size is small
         )
