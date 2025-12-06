@@ -227,8 +227,8 @@ impl Item for PdfPreviewView {
         self.item.read(cx).path
             .path
             .file_name()
-            .map(|n| n.to_string_lossy().to_string())
-            .unwrap_or_else(|| "PDF".to_string())
+            .unwrap_or("PDF")
+            .to_string()
             .into()
     }
 
