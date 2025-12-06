@@ -143,7 +143,7 @@ fn render_pdf_bytes(bytes: &[u8]) -> Option<Vec<Arc<gpui::Image>>> {
     let mut images = Vec::new();
     let page_count = document.pages().len();
     for i in 0..page_count {
-        if let Some(page) = document.pages().get(i) {
+        if let Ok(page) = document.pages().get(i) {
             let bitmap = page.render_with_config(&PdfRenderConfig::new().set_target_width(1000)).ok()?;
             let image = bitmap.as_image(); 
             
@@ -227,9 +227,8 @@ impl Item for PdfPreviewView {
         self.item.read(cx).path
             .path
             .file_name()
-            .and_then(|n| n.to_str())
-            .unwrap_or("PDF")
-            .to_string()
+            .map(|n| n.to_string_lossy().to_string())
+            .unwrap_or_else(|| "PDF".to_string())
             .into()
     }
 
